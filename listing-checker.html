@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listing Checkup</title>
+<style>
+  :root {
+    --bg: #FAF6EF;
+    --panel: #FFFFFF;
+    --ink: #23282B;
+    --ink-soft: #5B6367;
+    --line: #E4DCCB;
+    --navy: #1F3B3D;
+    --gold: #B8873B;
+    --good: #4C7A5B;
+    --good-bg: #EAF2EC;
+    --warn: #B3502E;
+    --warn-bg: #FBEEE7;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+
+  header {
+    padding: 48px 24px 32px;
+    text-align: left;
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  header h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 40px;
+    font-weight: 500;
+    margin: 0 0 10px;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+
+  header p {
+    max-width: 52ch;
+    color: var(--ink-soft);
+    font-size: 16px;
+    margin: 0;
+  }
+
+  main {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  @media (min-width: 860px) {
+    main { grid-template-columns: 1fr 1fr; align-items: start; }
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 32px;
+  }
+
+  fieldset {
+    border: none;
+    padding: 0;
+    margin: 0 0 24px;
+  }
+
+  legend {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--navy);
+    margin-bottom: 10px;
+    padding: 0;
+  }
+
+  label {
+    display: block;
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .field { margin-bottom: 20px; }
+
+  input[type="text"],
+  input[type="number"],
+  textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--ink);
+    background: var(--bg);
+  }
+
+  input:focus, textarea:focus {
+    outline: 2px solid var(--navy);
+    outline-offset: 1px;
+  }
+
+  textarea { min-height: 110px; resize: vertical; }
+
+  .hint {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 5px;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .amenity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+  }
+
+  .amenity-grid label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .amenity-grid input { width: 16px; height: 16px; margin: 0; }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  button:hover { background: #16292a; }
+
+  #results-panel {
+    min-height: 200px;
+  }
+
+  .placeholder {
+    color: var(--ink-soft);
+    font-size: 14.5px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 20px 0;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 26px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .score-circle {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .score-label {
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .score-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--navy);
+    margin: 2px 0 0;
+  }
+
+  .tip {
+    display: flex;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .tip:last-child { border-bottom: none; }
+
+  .tip-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+
+  .tip.good .tip-icon { background: var(--good-bg); color: var(--good); }
+  .tip.warn .tip-icon { background: var(--warn-bg); color: var(--warn); }
+
+  .tip-text strong {
+    display: block;
+    font-size: 14.5px;
+    margin-bottom: 2px;
+  }
+
+  .tip.good .tip-text strong { color: var(--good); }
+  .tip.warn .tip-text strong { color: var(--warn); }
+
+  .tip-text span {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Listing Checkup</h1>
+  <p>Fill in your listing details below and get a plain-language report on what to fix to attract more bookings.</p>
+</header>
+
+<main>
+  <div class="panel">
+    <form id="listing-form">
+      <fieldset>
+        <legend>The basics</legend>
+        <div class="field">
+          <label for="title">Listing title</label>
+          <input type="text" id="title" placeholder="e.g. Cozy 2BR near downtown with parking">
+        </div>
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" placeholder="Describe your place, the neighborhood, check-in details, and anything guests should know..."></textarea>
+          <div class="hint">Aim for at least 40 words. Mention check-in time and the neighborhood if you can.</div>
+        </div>
+        <div class="field">
+          <label for="photos">Number of photos</label>
+          <input type="number" id="photos" min="0" placeholder="e.g. 8">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Pricing</legend>
+        <div class="two-col">
+          <div class="field">
+            <label for="price">Your nightly price ($)</label>
+            <input type="number" id="price" min="0" placeholder="e.g. 120">
+          </div>
+          <div class="field">
+            <label for="nearby-price">Avg. price nearby ($)</label>
+            <input type="number" id="nearby-price" min="0" placeholder="e.g. 110">
+          </div>
+        </div>
+        <div class="hint">Not sure on the nearby number? Check 3-4 similar listings in your area and average them.</div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Amenities you offer</legend>
+        <div class="amenity-grid">
+          <label><input type="checkbox" value="WiFi"> WiFi</label>
+          <label><input type="checkbox" value="Air conditioning"> Air conditioning</label>
+          <label><input type="checkbox" value="Free parking"> Free parking</label>
+          <label><input type="checkbox" value="Washer"> Washer</label>
+          <label><input type="checkbox" value="Kitchen"> Kitchen</label>
+          <label><input type="checkbox" value="Heating"> Heating</label>
+          <label><input type="checkbox" value="Workspace"> Workspace</label>
+          <label><input type="checkbox" value="TV"> TV</label>
+        </div>
+      </fieldset>
+
+      <button type="submit">Check my listing</button>
+    </form>
+  </div>
+
+  <div class="panel" id="results-panel">
+    <div class="placeholder" id="placeholder-msg">
+      <span>Your report will show up here once you check your listing.</span>
+      <span>It'll cover your photos, price, description, and amenities — with plain tips on what to fix first.</span>
+    </div>
+    <div id="report" style="display:none;"></div>
+  </div>
+</main>
+
+<script>
+const form = document.getElementById('listing-form');
+const report = document.getElementById('report');
+const placeholder = document.getElementById('placeholder-msg');
+const IMPORTANT_AMENITIES = ["WiFi", "Air conditioning", "Free parking", "Washer", "Kitchen", "Heating"];
+
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const title = document.getElementById('title').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const photos = Number(document.getElementById('photos').value) || 0;
+  const price = Number(document.getElementById('price').value) || 0;
+  const nearbyPrice = Number(document.getElementById('nearby-price').value) || 0;
+  const checkedAmenities = Array.from(document.querySelectorAll('.amenity-grid input:checked')).map(i => i.value);
+
+  const tips = [];
+
+  // Photos check
+  if (photos === 0) {
+    tips.push({ good: false, title: "No photo count entered", detail: "Add photos of every room — listings with more photos consistently get more bookings." });
+  } else if (photos < 5) {
+    tips.push({ good: false, title: "Add more photos", detail: `You have ${photos}. Aim for at least 10, covering every room and any outdoor space.` });
+  } else if (photos < 10) {
+    tips.push({ good: false, title: "A few more photos would help", detail: `You have ${photos}. Listings with 10+ photos tend to convert better.` });
+  } else {
+    tips.push({ good: true, title: "Photo count looks solid", detail: `${photos} photos is a healthy amount for guests to get a full picture.` });
+  }
+
+  // Description checks
+  const wordCount = description.length ? description.split(/\s+/).length : 0;
+  if (wordCount < 40) {
+    tips.push({ good: false, title: "Description is too short", detail: `You're at ${wordCount} words. Add more detail about the space, the neighborhood, and what makes it worth booking.` });
+  } else {
+    tips.push({ good: true, title: "Description length is good", detail: `${wordCount} words gives guests enough to go on.` });
+  }
+
+  const descLower = description.toLowerCase();
+  if (!descLower.includes("check-in") && !descLower.includes("check in")) {
+    tips.push({ good: false, title: "Mention check-in details", detail: "Guests want to know check-in time and process before booking — add a line about it." });
+  }
+  if (!descLower.includes("neighborhood") && !descLower.includes("area") && !descLower.includes("walk")) {
+    tips.push({ good: false, title: "Mention the neighborhood", detail: "Say a bit about what's nearby (restaurants, transit, walkability) — it helps guests picture staying there." });
+  }
+
+  // Title check
+  if (title.length < 20) {
+    tips.push({ good: false, title: "Title could say more", detail: "A short title like this is easy to miss. Mention a standout feature — location, view, or amenity." });
+  } else {
+    tips.push({ good: true, title: "Title gives a good first impression", detail: "It's detailed enough to stand out in search results." });
+  }
+
+  // Price check
+  if (price > 0 && nearbyPrice > 0) {
+    const diff = (price - nearbyPrice) / nearbyPrice;
+    if (diff > 0.15) {
+      tips.push({ good: false, title: "Your price is notably higher than nearby listings", detail: `You're at $${price} vs. an area average of $${nearbyPrice}. Make sure your listing clearly justifies the gap, or consider lowering it.` });
+    } else if (diff < -0.15) {
+      tips.push({ good: false, title: "You might be underpricing", detail: `At $${price} vs. an area average of $${nearbyPrice}, you could likely raise your price without losing bookings.` });
+    } else {
+      tips.push({ good: true, title: "Price is in line with the area", detail: `$${price} is close to the area average of $${nearbyPrice}.` });
+    }
+  }
+
+  // Amenities check
+  const missing = IMPORTANT_AMENITIES.filter(a => !checkedAmenities.includes(a));
+  if (missing.length > 0) {
+    tips.push({ good: false, title: "Missing common amenities", detail: `Guests often filter by: ${missing.join(", ")}. Add these if you actually offer them, or consider adding them.` });
+  } else {
+    tips.push({ good: true, title: "You cover the common amenities", detail: "All the amenities guests usually filter by are checked." });
+  }
+
+  const goodCount = tips.filter(t => t.good).length;
+  const scoreOutOf10 = Math.round((goodCount / tips.length) * 10);
+
+  report.innerHTML = `
+    <div class="score-row">
+      <div class="score-circle">${scoreOutOf10}/10</div>
+      <div>
+        <div class="score-label">Your listing score</div>
+        <div class="score-title">${scoreOutOf10 >= 8 ? "Looking strong" : scoreOutOf10 >= 5 ? "Room to improve" : "Needs some work"}</div>
+      </div>
+    </div>
+    ${tips.map(t => `
+      <div class="tip ${t.good ? 'good' : 'warn'}">
+        <div class="tip-icon">${t.good ? '✓' : '!'}</div>
+        <div class="tip-text">
+          <strong>${t.title}</strong>
+          <span>${t.detail}</span>
+        </div>
+      </div>
+    `).join('')}
+  `;
+
+  placeholder.style.display = 'none';
+  report.style.display = 'block';
+});
+</script>
+
+</body>
+</html>
