@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { createClient } from "../utils/supabase";
 
 export default function PricingAdvisor() {
   const [baseRate, setBaseRate] = useState("");
@@ -9,6 +10,10 @@ export default function PricingAdvisor() {
   const [occupancy, setOccupancy] = useState("70");
   const [monthlyExpenses, setMonthlyExpenses] = useState("");
   
+  const [strategyName, setStrategyName] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+
   const [projection, setProjection] = useState<{
     monthlyRevenue: number;
     annualRevenue: number;
@@ -17,8 +22,11 @@ export default function PricingAdvisor() {
     tips: string[];
   } | null>(null);
 
+  const supabase = createClient();
+
   const calculateRevenue = (e: FormEvent) => {
     e.preventDefault();
+    setSaveMessage("");
     
     const rate = Number(baseRate) || 0;
     const weekendRate = rate + (Number(weekendPremium) || 0);
@@ -26,12 +34,10 @@ export default function PricingAdvisor() {
     const occRate = Number(occupancy) / 100 || 0;
     const expenses = Number(monthlyExpenses) || 0;
 
-    // Basic assumptions for a 30-day month
     const totalBookedDays = Math.round(30 * occRate);
     const weekendDaysBooked = Math.round(8 * occRate);
     const weekdayDaysBooked = totalBookedDays - weekendDaysBooked;
     
-    // Assume average stay is 3 days to calculate number of cleanings
     const estimatedStays = Math.max(1, Math.round(totalBookedDays / 3));
 
     const roomRevenue = (weekdayDaysBooked * rate) + (weekendDaysBooked * weekendRate);
@@ -53,6 +59,39 @@ export default function PricingAdvisor() {
       netProfit: totalNet,
       tips
     });
+  };
+
+  const saveStrategy = async () => {
+    setIsSaving(true);
+    setSaveMessage("");
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      setSaveMessage("❌ You must be logged in to save strategies.");
+      setIsSaving(false);
+      return;
+    }
+
+    const { error } = await supabase.from("pricing_strategies").insert({
+      user_id: user.id,
+      strategy_name: strategyName.trim() || "My Rental Strategy",
+      base_rate: Number(baseRate) || 0,
+      weekend_premium: Number(weekendPremium) || 0,
+      cleaning_fee: Number(cleaningFee) || 0,
+      occupancy_rate: Number(occupancy) || 0,
+      fixed_costs: Number(monthlyExpenses) || 0,
+    });
+
+    setIsSaving(false);
+
+    if (error) {
+      console.error(error);
+      setSaveMessage("❌ Error saving strategy. Try again.");
+    } else {
+      setSaveMessage("✅ Strategy saved successfully!");
+      setStrategyName("");
+    }
   };
 
   return (
@@ -146,6 +185,28 @@ export default function PricingAdvisor() {
                     ${projection.netProfit.toLocaleString()}
                   </div>
                 </div>
+              </div>
+
+              {/* Save Strategy Box */}
+              <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Save Strategy</h4>
+                <input 
+                  type="text" 
+                  value={strategyName} 
+                  onChange={(e) => setStrategyName(e.target.value)} 
+                  placeholder="Strategy Name (e.g. Summer Setup)" 
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" 
+                />
+                <button 
+                  onClick={saveStrategy}
+                  disabled={isSaving}
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                >
+                  {isSaving ? "Saving..." : "Save to Account 💾"}
+                </button>
+                {saveMessage && (
+                  <p className="text-xs font-medium text-center mt-1">{saveMessage}</p>
+                )}
               </div>
 
               <div className="space-y-3 pt-4 border-t border-slate-100">
