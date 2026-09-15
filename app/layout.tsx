@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Link from 'next/link';
+import AuthNav from './components/AuthNav';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -27,10 +28,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/pricing" className="text-sm font-medium text-slate-500 hover:text-emerald-600 transition hidden sm:block">
                 Pricing Advisor
               </Link>
-              {/* SHRUNK BUTTON AND CHANGED TO LINK */}
-              <Link href="/login" className="text-sm font-medium bg-slate-900 text-white px-4 py-1.5 rounded-md hover:bg-slate-800 transition shadow-sm active:scale-95">
-                Sign In
-              </Link>
+              
+              {/* Replaced static button with dynamic Auth Component */}
+              <AuthNav />
+              
             </div>
           </div>
         </nav>

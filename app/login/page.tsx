@@ -5,6 +5,7 @@ import { createClient } from "../utils/supabase";
 
 export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,15 +13,31 @@ export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const handleAuth = async (e) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
     if (isSignUp) {
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          data: {
+            first_name: firstName
+          }
+        }
+      });
       if (error) setMessage(error.message);
-      else setMessage("Check your email for the confirmation link!");
+      else {
+        // If email confirmation is ON, session is null until they click the link
+        if (!data.session) {
+          setMessage("Success! Check your email for the verification link.");
+        } else {
+          router.push("/");
+          router.refresh();
+        }
+      }
     } else {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setMessage(error.message);
@@ -32,7 +49,7 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  const alertColor = message.includes('Check') ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600';
+  const alertColor = message.includes('error') || message.includes('Invalid') ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600';
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-6">
@@ -49,6 +66,12 @@ export default function LoginPage() {
         </div>
 
         <form className="space-y-4" onSubmit={handleAuth}>
+          {isSignUp && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">First Name</label>
+              <input type="text" required value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="e.g. Alex" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+            </div>
+          )}
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Email</label>
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="host@example.com" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
