@@ -34,7 +34,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-600 selection:text-white">
-      <header className="max-w-4xl mx-auto pt-16 pb-10 px-6 text-center">
+      <header className="max-w-4xl mx-auto pt-24 pb-10 px-6 text-center">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold mb-4 tracking-wide uppercase">
           📊 Host Dashboard
         </div>
