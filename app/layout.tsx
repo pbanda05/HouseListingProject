@@ -22,6 +22,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               Host<span className="text-indigo-600">Toolkit</span>
             </Link>
             <div className="flex gap-6 items-center">
+              <Link href="/dashboard" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition hidden sm:block">
+                Dashboard
+              </Link>
               <Link href="/checkup" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition hidden sm:block">
                 Listing Checkup
               </Link>
