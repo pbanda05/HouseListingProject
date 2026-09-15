@@ -14,36 +14,53 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-50 text-slate-900`}>
+      <body className={`${inter.className} bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col justify-between`}>
         
-        <nav className="w-full border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <Link href="/" className="font-bold text-xl tracking-tight text-slate-900 transition hover:opacity-80">
-              Host<span className="text-indigo-600">Toolkit</span>
+        {/* Sticky Top Navigation */}
+        <nav className="w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-md fixed top-0 left-0 right-0 z-50 shadow-xs">
+          <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            
+            {/* Left: Brand Logo */}
+            <Link href="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight text-slate-900 transition hover:opacity-80">
+              <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-sm">
+                H
+              </div>
+              <span>Host<span className="text-indigo-600">Toolkit</span></span>
             </Link>
-            <div className="flex gap-6 items-center">
-              <Link href="/dashboard" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition hidden sm:block">
-                Dashboard
-              </Link>
-              <Link href="/checkup" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition hidden sm:block">
-                Listing Checkup
-              </Link>
-              <Link href="/pricing" className="text-sm font-medium text-slate-500 hover:text-emerald-600 transition hidden sm:block">
-                Pricing Advisor
-              </Link>
-              
-              {/* Replaced static button with dynamic Auth Component */}
-              <AuthNav />
-              
+
+            {/* Right: Nav Links + Auth */}
+            <div className="flex items-center gap-6">
+              <div className="hidden md:flex items-center gap-6">
+                <Link href="/dashboard" className="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition">
+                  Dashboard
+                </Link>
+                <Link href="/checkup" className="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition">
+                  Listing Checkup
+                </Link>
+                <Link href="/pricing" className="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition">
+                  Pricing Advisor
+                </Link>
+              </div>
+
+              <div className="h-5 w-px bg-slate-200 hidden md:block"></div>
+
+              <div className="flex items-center gap-3">
+                <AuthNav />
+              </div>
             </div>
+
           </div>
         </nav>
+
+        {/* Main Content Area with proper top spacing */}
+        <main className="flex-grow pt-28 pb-16">
+          {children}
+        </main>
         
-        {children}
-        
-        <footer className="w-full border-t border-slate-200 bg-white mt-12 py-8">
-          <div className="max-w-6xl mx-auto px-6 text-center text-slate-500 text-sm">
-            © 2026 HostToolkit. Built for scaleable, user-focused software.
+        {/* Footer */}
+        <footer className="w-full border-t border-slate-200 bg-white py-8">
+          <div className="max-w-7xl mx-auto px-6 text-center text-slate-500 text-sm">
+            © 2026 HostToolkit. Built for scalable, user-focused software.
           </div>
         </footer>
 
