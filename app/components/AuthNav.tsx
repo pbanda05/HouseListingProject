@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 export default function AuthNav() {
   const [user, setUser] = useState(null);
-  const [showToast, setShowToast] = useState(false);
+  const [toastState, setToastState] = useState('hidden');
   const supabase = createClient();
   const router = useRouter();
 
@@ -20,10 +20,11 @@ export default function AuthNav() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user || null);
       
-      // When the user clicks the email link or logs in, trigger the popup!
+      // When the user logs in, trigger the slow drop-down animation
       if (event === 'SIGNED_IN') {
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 5000); // Auto-hide after 5 seconds
+        setToastState('visible');
+        // Wait 4 seconds, then trigger the slow fade out/slide up
+        setTimeout(() => setToastState('hidden'), 4000); 
       }
     });
 
@@ -39,18 +40,19 @@ export default function AuthNav() {
 
   return (
     <Fragment>
-      {/* Floating Success Popup */}
-      {showToast && (
-        <div className="fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 z-50 border border-slate-700 transition-all">
-          <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-xl">
-            ✓
-          </div>
-          <div>
-            <p className="text-sm font-bold">Authentication Successful</p>
-            <p className="text-xs text-slate-300">Welcome to your account, {name}!</p>
-          </div>
+      {/* Floating Centered Toast Notification */}
+      <div 
+        className={`fixed top-12 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 z-[100] border border-slate-700 transition-all duration-1000 ease-in-out ${
+          toastState === 'visible' 
+            ? 'translate-y-0 opacity-100' 
+            : '-translate-y-24 opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="w-8 h-8 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-lg shrink-0">
+          ✓
         </div>
-      )}
+        <p className="text-sm font-medium pr-2">Authentication Successful, {name}!</p>
+      </div>
 
       {/* Normal Navigation Items */}
       {user ? (
