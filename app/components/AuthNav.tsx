@@ -20,11 +20,15 @@ export default function AuthNav() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user || null);
       
-      // When the user logs in, trigger the slow drop-down animation
       if (event === 'SIGNED_IN') {
-        setToastState('visible');
-        // Wait 4 seconds, then trigger the slow fade out/slide up
-        setTimeout(() => setToastState('hidden'), 4000); 
+        // NEW LOGIC: Only show if the local storage flag exists
+        if (typeof window !== 'undefined' && localStorage.getItem('showSignupToast') === 'true') {
+          setToastState('visible');
+          setTimeout(() => setToastState('hidden'), 4000); 
+          
+          // Delete the flag so it never shows on future log ins
+          localStorage.removeItem('showSignupToast');
+        }
       }
     });
 

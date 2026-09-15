@@ -30,9 +30,10 @@ export default function LoginPage() {
       });
       if (error) setMessage(error.message);
       else {
-        // If email confirmation is ON, session is null until they click the link
         if (!data.session) {
           setMessage("Success! Check your email for the verification link.");
+          // NEW LOGIC: Set a flag so the app knows this is a first-time verification
+          localStorage.setItem('showSignupToast', 'true');
         } else {
           router.push("/");
           router.refresh();
