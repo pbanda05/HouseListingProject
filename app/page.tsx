@@ -5,14 +5,22 @@ import { createClient } from "./utils/supabase";
 
 export default function LandingPage() {
   const [userName, setUserName] = useState(null);
+  const [isNewUser, setIsNewUser] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const name = user.user_metadata?.first_name || user.user_metadata?.full_name;
+        const name = user.user_metadata?.given_name || user.user_metadata?.first_name || user.user_metadata?.full_name?.split(" ")[0];
         if (name) setUserName(name);
+
+        // If their account was created within the last 10 seconds of their
+        // most recent sign-in, this is their very first sign-in ever
+        const createdAt = new Date(user.created_at).getTime();
+        const lastSignInAt = new Date(user.last_sign_in_at).getTime();
+        const secondsSinceCreation = (lastSignInAt - createdAt) / 1000;
+        setIsNewUser(secondsSinceCreation < 10);
       }
     };
     getUser();
@@ -24,7 +32,7 @@ export default function LandingPage() {
       <header className="max-w-4xl mx-auto pt-24 pb-16 px-6 text-center">
         {userName && (
           <div className="mb-4 inline-flex items-center px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-semibold">
-            👋 Welcome back, {userName}!
+            👋 {isNewUser ? "Welcome" : "Welcome back"}, {userName}!
           </div>
         )}
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 mb-6 leading-tight">
@@ -39,7 +47,6 @@ export default function LandingPage() {
       {/* Tools Grid */}
       <main className="max-w-6xl mx-auto px-6 pb-24">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          
           {/* Tool 1 Card */}
           <Link href="/checkup" className="block group">
             <div className="h-full bg-white border border-slate-200 rounded-3xl p-8 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-300">
