@@ -17,10 +17,12 @@ export default function LandingPage() {
 
         // If their account was created within the last 10 seconds of their
         // most recent sign-in, this is their very first sign-in ever
-        const createdAt = new Date(user.created_at).getTime();
-        const lastSignInAt = new Date(user.last_sign_in_at).getTime();
-        const secondsSinceCreation = (lastSignInAt - createdAt) / 1000;
-        setIsNewUser(secondsSinceCreation < 10);
+        if (user.created_at && user.last_sign_in_at) {
+          const createdAt = new Date(user.created_at).getTime();
+          const lastSignInAt = new Date(user.last_sign_in_at).getTime();
+          const secondsSinceCreation = (lastSignInAt - createdAt) / 1000;
+          setIsNewUser(secondsSinceCreation < 10);
+        }
       }
     };
     getUser();

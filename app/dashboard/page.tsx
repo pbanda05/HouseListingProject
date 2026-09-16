@@ -3,8 +3,20 @@ import { useEffect, useState } from "react";
 import { createClient } from "../utils/supabase";
 import Link from "next/link";
 
+type PricingStrategy = {
+  id: string;
+  user_id: string;
+  strategy_name: string;
+  created_at: string;
+  base_rate: number;
+  weekend_premium: number;
+  cleaning_fee: number;
+  occupancy_rate: number;
+  fixed_costs: number;
+};
+
 export default function DashboardPage() {
-  const [strategies, setStrategies] = useState([]);
+  const [strategies, setStrategies] = useState<PricingStrategy[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 

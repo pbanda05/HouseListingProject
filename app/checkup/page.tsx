@@ -18,13 +18,13 @@ export default function CheckupPage() {
     },
   });
 
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState<{ score: number; tips: string[] } | null>(null);
   const [emailInput, setEmailInput] = useState("");
   const [emailSent, setEmailSent] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailError, setEmailError] = useState("");
 
-  const handleChange = (e: React.ChangeEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };

@@ -3,9 +3,10 @@ import { useEffect, useState, Fragment } from 'react';
 import Link from 'next/link';
 import { createClient } from '../utils/supabase';
 import { useRouter } from 'next/navigation';
+import type { User } from '@supabase/supabase-js';
 
 export default function AuthNav() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [toastState, setToastState] = useState('hidden');
   const supabase = createClient();
   const router = useRouter();
