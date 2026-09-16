@@ -19,13 +19,11 @@ export default function AuthNav() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user || null);
-      
       if (event === 'SIGNED_IN') {
         // NEW LOGIC: Only show if the local storage flag exists
         if (typeof window !== 'undefined' && localStorage.getItem('showSignupToast') === 'true') {
           setToastState('visible');
-          setTimeout(() => setToastState('hidden'), 4000); 
-          
+          setTimeout(() => setToastState('hidden'), 4000);
           // Delete the flag so it never shows on future log ins
           localStorage.removeItem('showSignupToast');
         }
@@ -37,10 +35,19 @@ export default function AuthNav() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.refresh();
+    // Force a full reload and send them to the sign-in page,
+    // instead of router.refresh() which only quietly re-fetches data
+    window.location.href = "/login";
   };
 
-  const name = user?.user_metadata?.first_name || "Host";
+  // Google (and most providers) don't give a "first_name" field —
+  // check the fields that actually exist, in order of preference
+  const name =
+    user?.user_metadata?.given_name ||
+    user?.user_metadata?.full_name?.split(" ")[0] ||
+    user?.user_metadata?.name?.split(" ")[0] ||
+    user?.email?.split("@")[0] ||
+    "there";
 
   return (
     <Fragment>

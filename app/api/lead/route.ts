@@ -20,32 +20,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Securely insert the lead into the PostgreSQL 'leads' table
+    // Upsert instead of insert: if this email already exists, update their
+    // score instead of blocking them. Someone should be able to re-check
+    // their listing and get a new report anytime.
     const { data, error } = await supabase
       .from('leads')
-      .insert([{ email, score }]);
+      .upsert([{ email, score }], { onConflict: 'email' });
 
     if (error) {
-      // Handle unique constraint error for duplicate email to prevent crashes
-      if (error.code === '23505') {
-        return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
-      }
       throw error;
     }
 
-    console.log("Database Insert Success for:", email);
+    console.log("Database Upsert Success for:", email);
 
     // Build the nicer-looking email
     const emailHtml = `
       <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; background: #FAF6EF;">
         <div style="background: #1F3B3D; color: #ffffff; padding: 24px; border-radius: 8px 8px 0 0;">
-          <p style="margin: 0; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase; opacity: 0.7;">HostToolkit</p>
+          <p style="margin: 0; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase; opacity: 0.7;">HostElevate</p>
           <h1 style="margin: 8px 0 0; font-size: 22px;">Your Listing Report</h1>
         </div>
 
         <div style="background: #ffffff; padding: 28px 24px; border: 1px solid #E4DCCB; border-top: none;">
           <p style="font-size: 15px; color: #23282B; margin: 0 0 20px;">
-            Thanks for checking your listing with HostToolkit! Here's your score and next steps.
+            Thanks for checking your listing with HostElevate! Here's your score and next steps.
           </p>
 
           <div style="display: inline-block; background: #1F3B3D; color: #ffffff; width: 56px; height: 56px; border-radius: 50%; text-align: center; line-height: 56px; font-size: 18px; font-weight: bold; margin-bottom: 20px;">
@@ -64,7 +62,7 @@ export async function POST(request: Request) {
         </div>
 
         <p style="text-align: center; font-size: 12px; color: #5B6367; margin-top: 20px;">
-          Sent by HostToolkit — tools to help you rent smarter.
+          Sent by HostElevate — tools to help you rent smarter.
         </p>
       </div>
     `;
@@ -72,7 +70,7 @@ export async function POST(request: Request) {
     // Actually send the email now that the lead is saved
     try {
       await resend.emails.send({
-        from: 'HostToolkit <onboarding@resend.dev>', // swap this once you set up your own domain in Resend
+        from: 'HostElevate <onboarding@resend.dev>', // swap this once you set up your own domain in Resend
         to: email,
         subject: 'Your Listing Score + 5 Advanced Tips',
         html: emailHtml,
@@ -83,7 +81,7 @@ export async function POST(request: Request) {
       console.error("Email sending failed:", emailError);
     }
 
-    return NextResponse.json({ success: true, message: 'Lead securely saved!' }, { status: 200 });
+    return NextResponse.json({ success: true, message: 'Report saved and sent!' }, { status: 200 });
   } catch (error) {
     console.error("Database Error:", error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

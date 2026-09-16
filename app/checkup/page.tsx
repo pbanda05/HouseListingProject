@@ -6,14 +6,14 @@ export default function CheckupPage() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    photoCount: 5,
-    price: 150,
-    marketPrice: 160,
+    photoCount: "",
+    price: "",
+    marketPrice: "",
     amenities: {
-      wifi: true,
-      ac: true,
+      wifi: false,
+      ac: false,
       parking: false,
-      kitchen: true,
+      kitchen: false,
       washer: false,
     },
   });
@@ -22,6 +22,7 @@ export default function CheckupPage() {
   const [emailInput, setEmailInput] = useState("");
   const [emailSent, setEmailSent] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const handleChange = (e: React.ChangeEvent) => {
     const { name, value } = e.target;
@@ -79,24 +80,39 @@ export default function CheckupPage() {
 
     setResults({ score, tips });
     setEmailSent(false);
+    setEmailError("");
   };
 
   const sendReportEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!emailInput) return;
+    if (!emailInput || !results) return;
     setSendingEmail(true);
+    setEmailError("");
 
-    // Simulate reliable dispatch / or construct mailto trigger as fallback
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailInput, score: results.score }),
+      });
+
+      if (response.ok) {
+        setEmailSent(true);
+      } else {
+        const data = await response.json().catch(() => ({}));
+        setEmailError(data.error || "Something went wrong sending the report. Try again.");
+      }
+    } catch (err) {
+      setEmailError("Something went wrong sending the report. Try again.");
+    } finally {
       setSendingEmail(false);
-      setEmailSent(true);
-    }, 800);
+    }
   };
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
       <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold mb-4 tracking-wide uppercase">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-semibold mb-4 tracking-wide uppercase">
           ✨ Listing Checkup Tool
         </div>
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-3">
@@ -108,7 +124,7 @@ export default function CheckupPage() {
       </div>
 
       {!results ? (
-        <form onSubmit={runAudit} className="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-sm space-y-6">
+        <form onSubmit={runAudit} className="bg-white border border-[#E4DCCB] rounded-3xl p-8 shadow-sm space-y-6">
           <div>
             <label className="block text-sm font-semibold text-slate-900 mb-2">Listing Title</label>
             <input
@@ -118,7 +134,7 @@ export default function CheckupPage() {
               placeholder="e.g. Cozy 2BR Downtown Getaway"
               value={formData.title}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-sm"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1F3B3D] text-sm"
             />
           </div>
 
@@ -131,7 +147,7 @@ export default function CheckupPage() {
               placeholder="Describe your space, neighborhood, and amenities..."
               value={formData.description}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-sm"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1F3B3D] text-sm"
             />
           </div>
 
@@ -145,27 +161,27 @@ export default function CheckupPage() {
                 max="50"
                 value={formData.photoCount}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1F3B3D] text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-2">Your Nightly Price ($</label>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Your Nightly Price ($)</label>
               <input
                 type="number"
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1F3B3D] text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-2">Nearby Market Avg ($</label>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Nearby Market Avg ($)</label>
               <input
                 type="number"
                 name="marketPrice"
                 value={formData.marketPrice}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-600 text-sm"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1F3B3D] text-sm"
               />
             </div>
           </div>
@@ -180,7 +196,7 @@ export default function CheckupPage() {
                   onClick={() => handleAmenityChange(amenity)}
                   className={`px-4 py-2.5 rounded-xl border text-sm font-medium transition ${
                     formData.amenities[amenity as keyof typeof formData.amenities]
-                      ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+                      ? "bg-emerald-50 border-emerald-200 text-emerald-800"
                       : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
                   }`}
                 >
@@ -192,15 +208,15 @@ export default function CheckupPage() {
 
           <button
             type="submit"
-            className="w-full py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-all shadow-sm cursor-pointer"
+            className="w-full py-3.5 px-6 rounded-xl bg-[#1F3B3D] hover:bg-[#2b5254] text-white font-semibold text-sm transition-all shadow-sm cursor-pointer"
           >
             Run Listing Checkup →
           </button>
         </form>
       ) : (
-        <div className="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-sm space-y-6">
+        <div className="bg-white border border-[#E4DCCB] rounded-3xl p-8 shadow-sm space-y-6">
           <div className="text-center pb-6 border-b border-slate-100">
-            <span className="text-xs uppercase font-bold tracking-widest text-indigo-600">Audit Complete</span>
+            <span className="text-xs uppercase font-bold tracking-widest text-[#B8873B]">Audit Complete</span>
             <h2 className="text-4xl font-black text-slate-900 mt-1 mb-2">
               {results.score} / 10
             </h2>
@@ -212,7 +228,7 @@ export default function CheckupPage() {
           <div className="space-y-4">
             <h3 className="text-base font-bold text-slate-900">Optimization Tips ({results.tips.length})</h3>
             {results.tips.length === 0 ? (
-              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm">
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-sm">
                 🎉 Amazing job! Your listing hits all the key rule-based criteria for high visibility.
               </div>
             ) : (
@@ -227,29 +243,32 @@ export default function CheckupPage() {
           {/* Email Report Section */}
           <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
             <h4 className="text-sm font-bold text-slate-900">Email This Report</h4>
-            <p className="text-xs text-slate-500">Enter your email address to receive a copy of these optimization tips.
+            <p className="text-xs text-slate-500">Enter your email address to receive a copy of these optimization tips.</p>
             {emailSent ? (
-              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-semibold">
+              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-semibold">
                 ✅ Report successfully dispatched to {emailInput}! Check your inbox.
               </div>
             ) : (
-              <form onSubmit={sendReportEmail} className="flex gap-3">
+              <form onSubmit={sendReportEmail} className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="email"
                   required
                   placeholder="name@example.com"
                   value={emailInput}
                   onChange={(e) => setEmailInput(e.target.value)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 bg-white"
+                  className="flex-1 min-w-0 px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1F3B3D] bg-white"
                 />
                 <button
                   type="submit"
                   disabled={sendingEmail}
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#1F3B3D] hover:bg-[#2b5254] text-white font-semibold text-sm transition cursor-pointer disabled:opacity-50"
                 >
                   {sendingEmail ? "Sending..." : "Send Report"}
                 </button>
               </form>
+            )}
+            {emailError && (
+              <p className="text-xs text-red-600 font-medium">{emailError}</p>
             )}
           </div>
 
@@ -260,7 +279,7 @@ export default function CheckupPage() {
             >
               ← Edit Listing Details
             </button>
-            <Link href="/dashboard" className="flex-1 text-center py-3 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition">
+            <Link href="/dashboard" className="flex-1 text-center py-3 px-6 rounded-xl bg-[#1F3B3D] hover:bg-[#2b5254] text-white font-semibold text-sm transition">
               View Dashboard →
             </Link>
           </div>

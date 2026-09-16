@@ -7,7 +7,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'HostToolkit | Smarter tools for rental hosts',
+  title: 'HostElevate | Smarter tools for rental hosts',
   description: 'Data-driven calculators and audits to maximize your short-term rental revenue.',
 };
 
@@ -60,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Footer */}
         <footer className="w-full border-t border-slate-200 bg-white py-8">
           <div className="max-w-7xl mx-auto px-6 text-center text-slate-500 text-sm">
-            © 2026 HostToolkit. Built for scalable, user-focused software.
+            © 2026 HostElevate. Built for scalable, user-focused software.
           </div>
         </footer>
 
