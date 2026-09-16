@@ -2,17 +2,30 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
-// Initialize the secure database connection using the keys from your .env.local file
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// These are created lazily, inside the request handler, instead of at
+// module load time. Creating them at the top level made Vercel's build
+// step try to run this code (to collect page data) before env vars were
+// available, which crashed the whole build.
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error('Missing Supabase environment variables for /api/lead');
+  }
+  return createClient(url, key);
+}
 
-// Initialize Resend using the API key from your .env.local file
-const resend = new Resend(process.env.RESEND_API_KEY!);
+function getResendClient() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    throw new Error('Missing RESEND_API_KEY environment variable for /api/lead');
+  }
+  return new Resend(key);
+}
 
 export async function POST(request: Request) {
   try {
+    const supabase = getSupabaseClient();
     const body = await request.json();
     const { email, score } = body;
 
@@ -69,6 +82,7 @@ export async function POST(request: Request) {
 
     // Actually send the email now that the lead is saved
     try {
+      const resend = getResendClient();
       await resend.emails.send({
         from: 'HostElevate <onboarding@resend.dev>', // swap this once you set up your own domain in Resend
         to: email,
